@@ -2,76 +2,73 @@ import streamlit as st
 from groq import Groq
 import re
 
-# --- 1. GLOBAL UI & SİSTEM KONFİGÜRASYONU ---
+# --- 1. SİSTEM AYARLARI ---
 st.set_page_config(
-    page_title="K3N4N VOICE OMEGA v27.0",
+    page_title="K3N4N VOICE OMEGA v27.2",
     layout="wide",
     page_icon="🎙️"
 )
 
-# Web Speech API ve Kenan Style Tasarım Kodları
+# HTML/JS: Sesli Komut ve Arayüz Tasarımı
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Nabla&family=Bungee+Spice&family=Rampart+One&family=Sofia&family=Faster+One&family=Nosifer&family=Creepster&family=Righteous&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Nabla&family=Bungee+Spice&display=swap');
     
     .stApp { background-color: #020205; color: #ffffff; }
     
-    /* Sesli Komut Buton Stili */
-    .mic-container {
-        display: flex;
-        justify-content: center;
-        margin: 20px 0;
+    /* Ses Butonu */
+    .mic-wrap {
+        text-align: center;
+        padding: 20px;
     }
-    .mic-btn {
-        background: linear-gradient(135deg, #ff0000 0%, #880000 100%);
-        color: white; border: none; padding: 20px 40px;
+    .mic-button {
+        background: linear-gradient(135deg, #ff0000 0%, #770000 100%);
+        color: white; border: none; padding: 18px 40px;
         border-radius: 50px; font-weight: bold; cursor: pointer;
-        font-family: 'Orbitron', sans-serif; transition: 0.4s;
-        box-shadow: 0 0 25px rgba(255,0,0,0.5);
-        font-size: 1.2rem;
+        font-family: 'Orbitron', sans-serif;
+        box-shadow: 0 0 20px rgba(255,0,0,0.4);
+        font-size: 1.1rem;
+        transition: 0.3s;
     }
-    .mic-btn:hover { box-shadow: 0 0 50px #ff0000; transform: scale(1.05); }
-    .mic-active { animation: breathing 1s infinite alternate; background: #ff4444; }
+    .mic-button:active { transform: scale(0.95); background: #ff4444; }
+    .listening { animation: pulse-red 1.5s infinite; background: #ff0000 !important; }
     
-    @keyframes breathing {
-        from { transform: scale(1.05); box-shadow: 0 0 20px #ff0000; }
-        to { transform: scale(1.1); box-shadow: 0 0 60px #ff0000; }
+    @keyframes pulse-red {
+        0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); }
+        70% { box-shadow: 0 0 0 20px rgba(255, 0, 0, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
     }
 
-    /* Beyaz Canvas (Önizleme) */
-    iframe {
-        background-color: #FFFFFF !important;
-        border-radius: 20px;
-        box-shadow: 0 25px 70px rgba(0,0,0,0.6);
-        border: 4px solid #7000ff;
-    }
+    /* Beyaz Canvas */
+    iframe { background-color: #FFFFFF !important; border-radius: 15px; border: 3px solid #7000ff; }
     </style>
 
     <script>
-    function startVoice() {
+    function runVoice() {
         const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
         recognition.lang = 'tr-TR';
-        recognition.interimResults = false;
         
-        const micBtn = document.getElementById('mic-trigger');
-        micBtn.innerHTML = "🔴 DİNLİYORUM... KONUŞUN";
-        micBtn.classList.add('mic-active');
+        const btn = document.getElementById('voice-btn');
+        btn.innerHTML = "🔴 DİNLENİYOR...";
+        btn.classList.add('listening');
 
         recognition.onresult = function(event) {
-            const result = event.results[0][0].transcript;
-            // Streamlit textarea'yı bulup sesi metin olarak yazdırıyoruz
-            const ta = window.parent.document.querySelector('textarea[aria-label="Tasarım Tarifi:"]');
-            if (ta) {
-                ta.value = result;
-                ta.dispatchEvent(new Event('input', { bubbles: true }));
-            }
-            micBtn.innerHTML = "🎤 SESLİ KOMUT VER (Tıkla)";
-            micBtn.classList.remove('mic-active');
+            const text = event.results[0][0].transcript;
+            // Metin kutusunu bul ve doldur
+            const inputs = window.parent.document.querySelectorAll('textarea');
+            inputs.forEach(el => {
+                if(el.placeholder.includes("Nabla")) {
+                    el.value = text;
+                    el.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            });
+            btn.innerHTML = "🎤 SESLİ KOMUT VER";
+            btn.classList.remove('listening');
         };
 
         recognition.onerror = function() {
-            micBtn.innerHTML = "❌ HATA OLUŞTU (Tekrar Dene)";
-            micBtn.classList.remove('mic-active');
+            btn.innerHTML = "⚠️ TEKRAR DENE";
+            btn.classList.remove('listening');
         };
 
         recognition.start();
@@ -87,80 +84,49 @@ else:
         api_key = st.text_input("Groq API Key:", type="password")
 
 if not api_key:
-    st.info("Devam etmek için API Key giriniz.")
+    st.info("Lütfen sidebar'dan API Key girin.")
     st.stop()
 
 client = Groq(api_key=api_key)
 
-# --- 3. ANA PANEL ---
-st.markdown("<h1 style='text-align: center; font-family: Orbitron; color: #ff00cc;'>QUANTUM <span style='color:#3333ff'>VOICE</span> v27.0</h1>", unsafe_allow_html=True)
+# --- 3. ARAYÜZ ---
+st.markdown("<h1 style='text-align: center; font-family: Orbitron; color: #ff00cc;'>K3N4N <span style='color:#3333ff'>VOICE</span> OMEGA</h1>", unsafe_allow_html=True)
 
-# Mikrofon Butonu
-st.markdown('<div class="mic-container"><button id="mic-trigger" class="mic-btn" onclick="startVoice()">🎤 SESLİ KOMUT VER (Tıkla ve Konuş)</button></div>', unsafe_allow_html=True)
+# Ses Butonu (Doğrudan HTML)
+st.markdown('<div class="mic-wrap"><button id="voice-btn" class="mic-button" onclick="runVoice()">🎤 SESLİ KOMUT VER</button></div>', unsafe_allow_html=True)
 
-with st.form("voice_render_form"):
-    c1, c2 = st.columns([1, 1])
-    with c1:
-        nick_val = st.text_input("Görünecek Metin:", value="K3N4N")
-    with c2:
-        font_choice = st.selectbox("Baz Font:", ["Nabla", "Bungee Spice", "Sofia", "Rampart One", "Faster One", "Righteous"])
+with st.form("omega_form"):
+    col1, col2 = st.columns([1, 1])
+    with col1: nick = st.text_input("Nick:", value="K3N4N")
+    with col2: font = st.selectbox("Font:", ["Nabla", "Bungee Spice", "Sofia", "Faster One", "Righteous"])
 
-    user_prompt = st.text_area(
-        "Tasarım Tarifi:", 
-        placeholder="Mikrofon butonuna basıp konuşun veya buraya manuel yazın...",
-        height=120
-    )
-    
-    render_go = st.form_submit_button("⚡ TASARIMI OMEGA MOTORLA İŞLE")
+    desc = st.text_area("Tasarım Tarifi:", placeholder="Nabla fontunda, Ken7 gibi gold parlasın...", height=100)
+    render = st.form_submit_button("⚡ TASARIMI OLUŞTUR")
 
-# --- 4. RENDER ÇALIŞMASI ---
-if render_go:
-    with st.spinner("AI Sesinizi Arşiv DNA'sı ile birleştiriyor..."):
-        
-        system_logic = f"""
-        Sen 'K3N4N OMEGA' sistemisin. Kullanıcının tarifine göre SADECE HTML/CSS üret.
-        - Arşiv: Ken1-Ken8, Colors, Nostalji.
-        - Nick: '{nick_val}'
-        - Font: {font_choice}
-        - Zemin: BEYAZ (#FFFFFF).
-        - Efekt: yanson, parla, rainbow, gold_sparkle dokuları ve gölgeler kullan.
-        Sadece kodu ver, açıklama yapma.
-        """
-
+# --- 4. RENDER ---
+if render:
+    with st.spinner("Ses işleniyor ve render ediliyor..."):
         try:
-            res = client.chat.completions.create(
+            chat = client.chat.completions.create(
                 model="llama-3.3-70b-versatile",
-                messages=[{"role": "system", "content": system_logic},
-                          {"role": "user", "content": user_prompt}]
+                messages=[
+                    {"role": "system", "content": "Sadece HTML/CSS üret. Beyaz zemin. Ken1-Ken8 arşiv efektlerini kullan. Açıklama yapma."},
+                    {"role": "user", "content": f"Metin: {nick}, Font: {font}, Tarif: {desc}"}
+                ]
             )
+            code = re.sub(r"```(html|css)?", "", chat.choices[0].message.content).replace("```", "").strip()
             
-            raw_code = res.choices[0].message.content
-            clean_code = re.sub(r"```(html|css)?", "", raw_code).replace("```", "").strip()
-
             st.divider()
-            prev_col, source_col = st.columns([1.5, 1])
-            
-            with prev_col:
-                st.subheader("🖼️ Sesli Render Sonucu")
-                f_link = font_choice.replace(" ", "+")
-                
+            c1, c2 = st.columns([1.5, 1])
+            with c1:
+                f_url = font.replace(" ", "+")
                 full_html = f"""
-                <link href="https://fonts.googleapis.com/css2?family={f_link}&family=Nabla&family=Bungee+Spice&family=Sofia&family=Righteous&display=swap" rel="stylesheet">
-                <style>
-                    body {{ 
-                        margin: 0; background: #FFFFFF; 
-                        display: flex; justify-content: center; align-items: center; 
-                        height: 100vh; width: 100vw; overflow: hidden; 
-                    }}
-                </style>
-                {clean_code}
+                <link href="https://fonts.googleapis.com/css2?family={f_url}&family=Nabla&family=Bungee+Spice&display=swap" rel="stylesheet">
+                <style>body{{margin:0; background:#FFF; display:flex; justify-content:center; align-items:center; height:100vh; overflow:hidden;}}</style>
+                {code}
                 """
-                st.components.v1.html(full_html, height=550)
-            
-            with source_col:
-                st.subheader("📄 Tasarım Kodu")
-                st.code(clean_code, language="html")
-                st.download_button("Kodları İndir", full_html, file_name=f"{nick_val}_voice_design.html")
-
+                st.components.v1.html(full_html, height=500)
+            with c2:
+                st.code(code, language="html")
         except Exception as e:
-            st.error(f"Sistem Hatası: {e}")
+            st.error(f"Hata: {e}")
