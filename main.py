@@ -1,126 +1,131 @@
 import streamlit as st
 from groq import Groq
+import random
 
-# --- 1. SAYFA VE TEMA YAPILANDIRMASI ---
+# --- 1. PRO KONFİGÜRASYON ---
 st.set_page_config(
-    page_title="K3N4N QUANTUM V20 - V7.0 HYBRID",
+    page_title="K3N4N QUANTUM PRO v21",
     layout="wide",
-    page_icon="💎"
+    page_icon="⚡"
 )
 
-# V7.0 Temalı Arayüz CSS
+# Profesyonel Dark Mod & Mobil Uyum CSS
 st.markdown("""
     <style>
-    .stApp { background-color: #020205; color: #00f2ff; }
-    [data-testid="stSidebar"] { background-image: linear-gradient(#05051a, #000000); border-right: 2px solid #7000ff33; }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=Orbitron:wght@400;900&display=swap');
+    
+    .stApp { background-color: #050508; color: #ffffff; }
+    
+    /* Mobil Öncelikli Butonlar */
     .stButton>button {
-        background: linear-gradient(90deg, #00f2ff, #7000ff);
-        color: white; border: none; font-weight: 800;
-        border-radius: 5px; box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
+        width: 100%;
+        height: 3.5rem;
+        background: linear-gradient(135deg, #00f2ff 0%, #7000ff 100%);
+        color: white; border: none; font-weight: 700;
+        border-radius: 12px; font-size: 1.1rem;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    .stButton>button:hover { transform: translateY(-2px); box-shadow: 0 0 30px #00f2ff; }
-    .quantum-label { font-family: 'Orbitron', sans-serif; color: #7000ff; font-weight: bold; }
+    .stButton>button:active { transform: scale(0.95); }
+    
+    /* Text Area Optimizasyonu */
+    .stTextArea textarea {
+        background-color: #0a0a15 !important;
+        color: #00f2ff !important;
+        border: 1px solid #1a1a3a !important;
+        border-radius: 10px !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. API GÜVENLİĞİ ---
+# --- 2. API & AUTH ---
 if "GROQ_API_KEY" in st.secrets:
     api_key = st.secrets["GROQ_API_KEY"]
 else:
     with st.sidebar:
-        api_key = st.text_input("Groq API Key:", type="password")
+        api_key = st.text_input("Groq Cloud Key:", type="password")
 
 if not api_key:
-    st.info("Lütfen Secrets veya Sidebar üzerinden API Key giriniz.")
     st.stop()
 
 client = Groq(api_key=api_key)
 
-# --- 3. SIDEBAR: V7.0 KONTROL PARAMETRELERİ ---
+# --- 3. SİSTEM HAFIZASI (SESSION STATE) ---
+if 'chaos_seed' not in st.session_state:
+    st.session_state.chaos_seed = "QUANTUM-001"
+
+# --- 4. SIDEBAR: PROFESSIONAL CONTROLS ---
 with st.sidebar:
-    st.image("https://img.icons8.com/nolan/64/quantum-glance.png", width=50)
-    st.title("V7.0 DNA ENGINE")
+    st.markdown("## ⚙️ STUDIO SETTINGS")
     
-    st.markdown("### 🎚️ Manuel Dokunuşlar")
-    font_choice = st.selectbox("Font Ailesi", ["Orbitron", "Press Start 2P", "VT323", "Space Grotesk", "Fira Code"])
-    base_size = st.slider("Yazı Boyutu", 20, 150, 70)
+    selected_font = st.selectbox("Font Library", ["Orbitron", "Inter", "Space Grotesk", "Fira Code", "Bangers"])
+    design_depth = st.select_slider("Design Depth", options=["Flat", "Layered", "3D Ultra", "Hyper-Chaos"])
     
     st.divider()
-    st.markdown("### 🧬 V7.0 Modülleri")
-    v7_mode = st.multiselect("Aktif Edilecek DNA Parçaları:", 
-                             ["Neon Glow v7", "3D Chaos Transform", "Gradient Border", "Glassmorphism Pro", "Text Stroke"],
-                             default=["Neon Glow v7", "3D Chaos Transform"])
-    
-    if st.button("🌀 CHAOS SEED ÜRET"):
-        st.session_state.chaos_seed = f"v7-{random.randint(1000, 9999)}"
-        st.toast("Chaos Seed Güncellendi!")
+    # Chaos Seed Motoru (Tamir Edildi)
+    if st.button("🌀 REGENERATE CHAOS SEED"):
+        st.session_state.chaos_seed = f"QS-{random.randint(100000, 999999)}"
+        st.success(f"Seed: {st.session_state.chaos_seed}")
 
-# --- 4. ANA PANEL: AI TASARIM ÜSSÜ ---
-st.markdown("<h1 style='text-align: center; color: #00f2ff; font-family: Orbitron;'>K3N4N QUANTUM V20 <span style='color:#7000ff'>V7.0 HYBRID</span></h1>", unsafe_allow_html=True)
-st.caption("<p style='text-align: center;'>V7.0 Ultimate Pro Algoritmaları ile Güçlendirilmiş Yapay Zeka</p>", unsafe_allow_html=True)
+# --- 5. ANA PANEL ---
+st.markdown("<h1 style='text-align: center; letter-spacing: 5px; font-family: Orbitron;'>QUANTUM <span style='color:#00f2ff'>PRO</span> v21</h1>", unsafe_allow_html=True)
 
-col_input, col_output = st.columns([1, 1.2])
+col_input, col_output = st.columns([1, 1.3])
 
 with col_input:
-    st.markdown("### ✍️ Tasarım Direktifi")
-    prompt = st.text_area("Hayalindeki tasarımı tarif et...", 
-                          placeholder="Örn: Bursa gecesi moru, yanıp sönen neon kenarlar, cam panel ve 3D eğimli yazı...",
-                          height=220)
+    st.markdown("### 🧬 DESIGN PROMPT")
+    # Kullanıcı sadece yazar ve aşağıdaki butona basar (Enter/Ctrl+Enter bağımlılığı yok)
+    user_input = st.text_area("Tasarım stilini belirtin:", 
+                              placeholder="Örn: Cyberpunk lila tonlarında, glitch efektli, keskin borderlı bir nick tasarımı...",
+                              height=150, help="Mobil kullanıcılar için metni yazıp direkt aşağıdaki butona basmanız yeterlidir.")
     
-    st.markdown("### 🎭 Stil Ayarları")
-    c1, c2 = st.columns(2)
-    with c1:
-        use_gif = st.toggle("GIF Arka Plan", value=True)
-        is_glitch = st.toggle("Glitch Efekti", value=False)
-    with c2:
-        is_mobile = st.toggle("Mobil Uyumlu", value=True)
-        show_code = st.toggle("Kodları Göster", value=True)
+    display_name = st.text_input("Nick / Metin:", value="K3N4N")
+    
+    generate_btn = st.button("⚡ GENERATE DESIGN")
 
-    generate = st.button("🚀 QUANTUM MOTORUNU TETİKLE")
-
-# --- 5. AI GENERATION (V7.0 DNA ENTEGRASYONU) ---
-if generate and prompt:
-    with st.spinner("V7.0 Algoritmaları işleniyor..."):
-        # V7.0 Referans dosyasından alınan teknikleri AI'ya kural olarak veriyoruz
-        v7_instructions = f"""
-        Sen K3N4N V7.0 CSS Generator'ın yapay zeka versiyonusun. 
-        Aşağıdaki teknik standartlara göre kod üret:
-        - Kullanılan Font: {font_choice}. Yazı boyutu: {base_size}px.
-        - Aktif Modüller: {', '.join(v7_mode)}.
-        - Renk Paleti: Genelde #00f2ff (cyan), #7000ff (purple), #ff00ff (magenta) kullan.
-        - Arka Plan: { 'GIF kullan (uygun bir URL bul)' if use_gif else 'Profesyonel Gradyan' }.
-        - CSS Kuralları: 'webkit-text-stroke', 'backdrop-filter', 'clip-path' ve 'keyframes' animasyonlarını V7.0 standartlarında kullan.
-        - Çıktı: Sadece bir <div> içinde, içinde 'K3N4N QUANTUM' yazan tek bir blok HTML/CSS kodu ver. Açıklama yapma.
-        """
+# --- 6. AI ENGINE (V7.0 DNA + PRO UX) ---
+if generate_btn and user_input:
+    with st.spinner("Quantum Engine Processing..."):
         
+        # AI'ya verilen "Professional Global" Talimatı
+        pro_instruction = f"""
+        Sen üst düzey bir dijital tasarımcı ve CSS mühendisisin. 
+        Müşteri için 'Global High-End' standartlarında bir nick tasarımı üret.
+        - Nick: '{display_name}'
+        - Ana Stil: {user_input}
+        - Font: {selected_font}
+        - Karmaşıklık Seviyesi: {design_depth}
+        - Seed: {st.session_state.chaos_seed}
+
+        TEKNİK ŞARTLAR:
+        1. Sadece TEK BİR <div> içinde, modern CSS (Glassmorphism, 3D Transforms, Keyframe Animations) kullanarak tasarım yap.
+        2. K3N4N V7.0 mimarisindeki 'clip-path' ve 'text-stroke' tekniklerini mutlaka uygula.
+        3. Sonuç tamamen mobil uyumlu (responsive) olsun.
+        4. Sadece kodu ver, konuşma yapma.
+        """
+
         try:
-            response = client.chat.completions.create(
+            completion = client.chat.completions.create(
                 model="llama-3.3-70b-versatile",
-                messages=[
-                    {"role": "system", "content": v7_instructions},
-                    {"role": "user", "content": f"Tasarım Tarifi: {prompt}"}
-                ]
+                messages=[{"role": "system", "content": pro_instruction},
+                          {"role": "user", "content": user_input}]
             )
             
-            raw_code = response.choices[0].message.content
+            output_code = completion.choices[0].message.content
 
             with col_output:
-                st.subheader("🖼️ Quantum Önizleme")
-                # Google Fonts Import
-                font_url = f"https://fonts.googleapis.com/css2?family={font_choice.replace(' ', '+')}:wght@400;900&display=swap"
-                st.markdown(f'<link href="{font_url}" rel="stylesheet">', unsafe_allow_html=True)
+                st.subheader("🖼️ STUDIO PREVIEW")
+                # Font Import
+                st.markdown(f'<link href="https://fonts.googleapis.com/css2?family={selected_font.replace(" ", "+")}:wght@400;900&display=swap" rel="stylesheet">', unsafe_allow_html=True)
                 
                 # HTML Render
-                st.components.v1.html(raw_code, height=500, scrolling=True)
+                st.components.v1.html(output_code, height=550, scrolling=True)
                 
-                if show_code:
-                    with st.expander("📄 V7.0 Standartlarında CSS/HTML Kodu"):
-                        st.code(raw_code, language="html")
-                        st.download_button("Dosyayı İndir (.html)", raw_code, file_name="quantum_v7_design.html")
-
+                with st.expander("📋 VIEW SOURCE CODE"):
+                    st.code(output_code, language="html")
+        
         except Exception as e:
-            st.error(f"Sistem Hatası: {str(e)}")
+            st.error(f"Engine Error: {e}")
 
-# --- 6. FOOTER ---
+# --- 7. FOOTER ---
 st.divider()
-st.markdown("<p style='text-align: center; color: #333;'>Bursa Global Radio Hub | K3N4N Quantum Studio v20.0 Hybrid Edition</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #444; font-size: 0.8rem;'>QUANTUM PRO v21.0 | POWERED BY GROQ & V7.0 DNA</p>", unsafe_allow_html=True)
