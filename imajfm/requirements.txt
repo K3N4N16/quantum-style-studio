@@ -1,0 +1,6 @@
+streamlit>=1.40
+numpy
+google-genai>=2.25.0
+miniaudio
+lameenc
+pandas
